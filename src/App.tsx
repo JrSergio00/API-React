@@ -1,33 +1,69 @@
-import axios from 'axios'
+import { useState } from 'react'
 import './App.css'
-import { useState } from "react";
+import axios from "axios"
 
-const api = axios.create({
-  baseURL: "https://infoweb-api.vercel.app/",
-})
-
-const AppNavBar = (props: any) => {
+const AppNavBar = () => {
   return (
     <>
       <h1>Unidades Federativas do Brasil</h1>
       <h2>Requisição à uma Api</h2>
-      <button onClick={props.onClick}>Buscar UF's</button>
+    </>
+  )
+}
+const AppUfLista = (props: any) => {
+  return(
+    <>
+      <ul>
+        {props.ufs.map( (item: any) => (
+          <li key={item.id} onClick={item.sigla} >{item.sigla}</li>
+        ) )}
+      </ul>
     </>
   )
 }
 
-const AppCard = (props: any) =>{
-  return (
-    <div className='Card'>
-      <h3>{props.sigla}</h3>
+const AppUfDetalhe = (props: any) => {
+
+  return(
+    <>
+      <h2>{props.sigla}</h2>
       <p>{props.nome}</p>
-    </div>
+      <button onClick={props.carregarUfs}>Carregar UFs</button>
+    </>
   )
 }
 
 const App = () => {
+  const [uf, setUf] = useState([
+    {
+      sigla: "RN",
+      nome: "Rio Grande do Norte"
+    },
+    {
+      sigla: "AL",
+      nome: "Alagoas"
+    },
+    {
+      sigla: "BA",
+      nome: "Bahia"
+    },
+    {
+      sigla: "PE",
+      nome: "Pernambuco"
+    },
+    {
+      sigla: "CE",
+      nome: "Ceará"
+    },
+  ])
+
   const [ufs, setUfs] = useState([])
-  const onClick = () => {
+
+  const api = axios.create({
+    baseURL: "https://infoweb-api.vercel.app/",
+  })
+
+  const carregarUfs = () => {
     api.get("uf").then(
       (resposta) => {
         console.info(resposta.data.data)
@@ -36,19 +72,18 @@ const App = () => {
       }
     );
   }
-
+  
   return (
     <>
-      <AppNavBar onClick={onClick}/>
+      <AppNavBar />
 
-      <main>
-        {ufs.map((uf: any, indice: number) => (
-            <AppCard key={indice} sigla={uf.sigla} nome={uf.nome}/>
-          ))}
-      </main>
+      <AppUfLista ufs={ufs}/>
+
+      {uf.map( (item: any, indice: number) => (
+        <AppUfDetalhe key={indice} sigla={item.sigla} nome={item.nome} carregarUfs={carregarUfs}/>
+      ) )}
     </>
   )
 }
-
 
 export default App
