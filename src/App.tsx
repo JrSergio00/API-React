@@ -2,11 +2,20 @@ import { useState } from 'react'
 import './App.css'
 import axios from "axios"
 
-const AppNavBar = () => {
+const AppNavBar = (props: any) => {
   return (
     <>
       <h1>Unidades Federativas do Brasil</h1>
       <h2>Requisição à uma Api</h2>
+      <button onClick={props.carregarUfs}>Carregar UFs</button>
+    </>
+  )
+}
+const AppUfDetalhe = (props: any) => {
+  return(
+    <>
+      <h2>{props.sigla}</h2>
+      <p>{props.nome}</p>
     </>
   )
 }
@@ -15,50 +24,19 @@ const AppUfLista = (props: any) => {
     <>
       <ul>
         {props.ufs.map( (item: any) => (
-          <li key={item.id} onClick={item.sigla} >{item.sigla}</li>
-        ) )}
+          <li key={item.id} onClick={ () => props.detalhar(item.sigla)}>
+            {item.sigla}
+          </li>
+        ))}
       </ul>
     </>
   )
 }
 
-const AppUfDetalhe = (props: any) => {
-
-  return(
-    <>
-      <h2>{props.sigla}</h2>
-      <p>{props.nome}</p>
-      <button onClick={props.carregarUfs}>Carregar UFs</button>
-    </>
-  )
-}
 
 const App = () => {
-  const [uf] = useState([
-    {
-      sigla: "RN",
-      nome: "Rio Grande do Norte"
-    },
-    {
-      sigla: "AL",
-      nome: "Alagoas"
-    },
-    {
-      sigla: "BA",
-      nome: "Bahia"
-    },
-    {
-      sigla: "PE",
-      nome: "Pernambuco"
-    },
-    {
-      sigla: "CE",
-      nome: "Ceará"
-    },
-  ])
-
+  const [uf, setUf] = useState([])
   const [ufs, setUfs] = useState([])
-
   const api = axios.create({
     baseURL: "https://infoweb-api.vercel.app/",
   })
@@ -66,22 +44,29 @@ const App = () => {
   const carregarUfs = () => {
     api.get("uf").then(
       (resposta) => {
-        console.info(resposta.data.data)
-        const listaUf = resposta.data.data
-        setUfs(listaUf)
+        const listaUfs = resposta.data.data
+        setUfs(listaUfs)
+      }
+    );
+  }
+  const detalhar = (sigla: any) =>{
+    api.get(`uf/${sigla}`).then(
+      (resposta) => {
+        console.log("AAA")
+        const Uf = resposta.data.data[0].nome
+        setUf(Uf)
       }
     );
   }
   
   return (
     <>
-      <AppNavBar />
+      <AppNavBar carregarUfs={carregarUfs}/>
+      
+      <AppUfDetalhe sigla={uf} nome={uf}/>
 
-      <AppUfLista ufs={ufs}/>
+      <AppUfLista ufs={ufs} detalhar={detalhar}/>
 
-      {uf.map( (item: any, indice: number) => (
-        <AppUfDetalhe key={indice} sigla={item.sigla} nome={item.nome} carregarUfs={carregarUfs}/>
-      ) )}
     </>
   )
 }
