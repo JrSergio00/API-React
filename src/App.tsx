@@ -34,7 +34,7 @@ const AppUfDetalhe = (props: any) => {
 }
 
 const App = () => {
-  const [uf, setUf] = useState([
+  const [uf] = useState([
     {
       sigla: "RN",
       nome: "Rio Grande do Norte"
